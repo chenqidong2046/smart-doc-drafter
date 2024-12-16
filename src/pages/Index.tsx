@@ -14,6 +14,7 @@ import { useState } from "react";
 const Index = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    documentType: "",
     topic: "",
     keywords: "",
     subject: "",
@@ -36,6 +37,20 @@ const Index = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              文档类型
+            </label>
+            <Input
+              required
+              value={formData.documentType}
+              onChange={(e) =>
+                setFormData({ ...formData, documentType: e.target.value })
+              }
+              placeholder="请输入文档类型，如：报告、通知、总结等"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               主题
