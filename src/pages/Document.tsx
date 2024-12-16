@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Document = () => {
   const location = useLocation();
-  const [document, setDocument] = useState("");
+  const [documentContent, setDocumentContent] = useState("");
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
 
@@ -16,7 +16,7 @@ const Document = () => {
     const { topic, keywords, subject, audience, wordCount, additionalInfo } =
       location.state;
     const initialDoc = `关于${topic}的报告\n\n主要内容：${subject}\n目标受众：${audience}\n关键词：${keywords}\n\n这里是生成的文档内容...`;
-    setDocument(initialDoc);
+    setDocumentContent(initialDoc);
   }, [location.state]);
 
   const handleMessageSubmit = (e: React.FormEvent) => {
@@ -28,18 +28,18 @@ const Document = () => {
     // Simulate AI response
     setChatHistory((prev) => [...prev, `AI: 已根据您的要求调整文档内容`]);
     // Update document based on message (in real app, this would be AI-generated)
-    setDocument((prev) => prev + "\n\n[根据用户反馈添加的新内容]");
+    setDocumentContent((prev) => prev + "\n\n[根据用户反馈添加的新内容]");
     setMessage("");
   };
 
   const handleDownload = () => {
-    const element = document.createElement("a");
-    const file = new Blob([document], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+    const element = window.document.createElement("a");
+    const file = new Blob([documentContent], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
     element.href = URL.createObjectURL(file);
     element.download = "generated-document.docx";
-    document.body.appendChild(element);
+    window.document.body.appendChild(element);
     element.click();
-    document.body.removeChild(element);
+    window.document.body.removeChild(element);
   };
 
   return (
@@ -88,7 +88,7 @@ const Document = () => {
         <ScrollArea className="flex-1">
           <div className="bg-white p-8 rounded-lg shadow min-h-full">
             <div className="prose max-w-none">
-              {document.split("\n").map((line, index) => (
+              {documentContent.split("\n").map((line, index) => (
                 <p key={index} className="mb-4">
                   {line}
                 </p>
