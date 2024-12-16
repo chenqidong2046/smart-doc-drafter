@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,10 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     documentType: "",
     topic: "",
@@ -23,8 +24,20 @@ const Index = () => {
     additionalInfo: "",
   });
 
+  // Load form data from localStorage or location state when component mounts
+  useEffect(() => {
+    const savedFormData = localStorage.getItem('formData');
+    if (location.state) {
+      setFormData(location.state);
+    } else if (savedFormData) {
+      setFormData(JSON.parse(savedFormData));
+    }
+  }, [location.state]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Save form data to localStorage before navigating
+    localStorage.setItem('formData', JSON.stringify(formData));
     navigate("/document", { state: formData });
   };
 
