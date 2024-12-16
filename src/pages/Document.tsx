@@ -1,4 +1,4 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,17 +7,23 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Document = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [documentContent, setDocumentContent] = useState("");
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
 
   useEffect(() => {
+    // If there's no state, redirect to the form page
+    if (!location.state) {
+      navigate('/');
+      return;
+    }
+
     // Simulate initial document generation
-    const { topic, keywords, subject, audience, wordCount, additionalInfo } =
-      location.state;
+    const { topic, keywords, subject, audience, wordCount, additionalInfo } = location.state;
     const initialDoc = `关于${topic}的报告\n\n主要内容：${subject}\n目标受众：${audience}\n关键词：${keywords}\n\n这里是生成的文档内容...`;
     setDocumentContent(initialDoc);
-  }, [location.state]);
+  }, [location.state, navigate]);
 
   const handleMessageSubmit = (e: React.FormEvent) => {
     e.preventDefault();
