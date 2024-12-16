@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ArrowLeft } from "lucide-react";
 
 const Document = () => {
   const location = useLocation();
@@ -48,11 +49,24 @@ const Document = () => {
     window.document.body.removeChild(element);
   };
 
+  const handleBack = () => {
+    // Navigate back with the original form data
+    navigate('/', { state: location.state });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Left side - Chat */}
       <div className="w-1/3 bg-white border-r border-gray-200 p-4 flex flex-col">
-        <div className="mb-4">
+        <div className="mb-4 flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            className="gap-2" 
+            onClick={handleBack}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            返回
+          </Button>
           <h2 className="text-lg font-semibold text-gray-900">对话窗口</h2>
         </div>
         
