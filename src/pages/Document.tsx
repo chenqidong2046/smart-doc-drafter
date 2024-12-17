@@ -1,7 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft } from "lucide-react";
@@ -55,13 +54,13 @@ const Document = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex">
       {/* Left side - Chat */}
       <div className="w-1/3 bg-white border-r border-gray-200 p-4 flex flex-col">
         <div className="mb-4 flex items-center justify-between">
           <Button 
             variant="ghost" 
-            className="gap-2" 
+            className="gap-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700" 
             onClick={handleBack}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -76,7 +75,7 @@ const Document = () => {
               <div
                 key={index}
                 className={`p-3 rounded-lg ${
-                  chat.startsWith("用户:") ? "bg-blue-50" : "bg-gray-50"
+                  chat.startsWith("用户:") ? "bg-blue-50 text-blue-900" : "bg-gray-50"
                 }`}
               >
                 {chat}
@@ -90,7 +89,7 @@ const Document = () => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="输入修改建议..."
-            className="mb-2"
+            className="mb-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
           />
           <Button type="submit" className="w-full">
             发送
@@ -106,10 +105,10 @@ const Document = () => {
         </div>
         
         <ScrollArea className="flex-1">
-          <div className="bg-white p-8 rounded-lg shadow min-h-full">
+          <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100 min-h-full">
             <div className="prose max-w-none">
               {documentContent.split("\n").map((line, index) => (
-                <p key={index} className="mb-4">
+                <p key={index} className="mb-4 text-gray-700">
                   {line}
                 </p>
               ))}

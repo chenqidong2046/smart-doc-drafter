@@ -43,26 +43,30 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <img src="/lovable-uploads/a0ea2d20-6785-41ab-b3d0-cb12d1676761.png" alt="华中师范大学" className="h-12" />
+          <img 
+            src="/lovable-uploads/a0ea2d20-6785-41ab-b3d0-cb12d1676761.png" 
+            alt="华中师范大学" 
+            className="h-12 object-contain"
+          />
           <Button
-            variant="outline"
+            variant="ghost"
             size="icon"
             onClick={() => navigate("/settings")}
-            className="rounded-full"
+            className="rounded-full hover:bg-blue-50"
           >
-            <Settings className="h-4 w-4" />
+            <Settings className="h-5 w-5 text-blue-600" />
           </Button>
         </div>
+
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">智能公文起草专家</h1>
-          <p className="mt-2 text-gray-600">填写以下信息，开始智能文档起草</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">智能公文起草专家</h1>
+          <p className="text-gray-600">填写以下信息，开始智能文档起草</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow">
-          {/* 主题 - First row */}
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-lg border border-gray-100">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               主题
@@ -74,10 +78,10 @@ const Index = () => {
                 setFormData({ ...formData, topic: e.target.value })
               }
               placeholder="请输入文档主题"
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
-          {/* 文档类型和字数 - Second row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -89,7 +93,7 @@ const Index = () => {
                   setFormData({ ...formData, documentType: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200">
                   <SelectValue placeholder="选择文档类型" />
                 </SelectTrigger>
                 <SelectContent>
@@ -103,6 +107,7 @@ const Index = () => {
                 </SelectContent>
               </Select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 字数
@@ -113,7 +118,7 @@ const Index = () => {
                   setFormData({ ...formData, wordCount: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200">
                   <SelectValue placeholder="选择字数" />
                 </SelectTrigger>
                 <SelectContent>
@@ -127,7 +132,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* 主体和受众 - Third row */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -140,6 +144,7 @@ const Index = () => {
                   setFormData({ ...formData, subject: e.target.value })
                 }
                 placeholder="请输入文档主体"
+                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -153,6 +158,7 @@ const Index = () => {
                   setFormData({ ...formData, audience: e.target.value })
                 }
                 placeholder="请输入目标受众"
+                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -168,6 +174,7 @@ const Index = () => {
                 setFormData({ ...formData, keywords: e.target.value })
               }
               placeholder="请输入关键词，多个关键词请用逗号分隔"
+              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
@@ -181,7 +188,7 @@ const Index = () => {
                 setFormData({ ...formData, additionalInfo: e.target.value })
               }
               placeholder="请输入其他补充信息"
-              className="h-32"
+              className="h-32 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
