@@ -62,7 +62,7 @@ const Index = () => {
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">智能公文起草专家</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 kaiti">智能公文起草专家</h1>
           <p className="text-gray-600">填写以下信息，开始智能文档起草</p>
         </div>
 

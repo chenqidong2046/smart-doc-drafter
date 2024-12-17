@@ -99,3 +99,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@font-face {
+  font-family: 'KaiTi';
+  src: local('KaiTi');
+}
+
+.kaiti {
+  font-family: KaiTi, serif;
+}
