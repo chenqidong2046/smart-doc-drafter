@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const Index = () => {
@@ -44,6 +45,17 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <img src="/lovable-uploads/a0ea2d20-6785-41ab-b3d0-cb12d1676761.png" alt="华中师范大学" className="h-12" />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate("/settings")}
+            className="rounded-full"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">智能公文起草专家</h1>
           <p className="mt-2 text-gray-600">填写以下信息，开始智能文档起草</p>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -10,26 +10,80 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { toast } from "sonner";
 
 const Settings = () => {
   const [systemPrompt, setSystemPrompt] = useState("");
-  const [userPrompt, setUserPrompt] = useState("");
-  const [modelType, setModelType] = useState("gpt-4");
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
+  const [modelType, setModelType] = useState("");
+  const [modelName, setModelName] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const handleSavePrompts = () => {
-    // Here you would typically save to a backend
-    localStorage.setItem("systemPrompt", systemPrompt);
-    localStorage.setItem("userPrompt", userPrompt);
-    toast.success("提示词保存成功");
+  const formFields = [
+    "文档类型",
+    "主题",
+    "关键词",
+    "主体",
+    "受众",
+    "字数",
+    "其他信息"
+  ];
+
+  const modelOptions = {
+    "通义千问": ["qwen-long", "qwen72b", "qwen32b"],
+    "讯飞星火": ["v3.5", "v3.0", "v2.0"],
+    "字节豆包": ["doupo-01", "doupo-02", "doupo-03"],
+    "百度文心": ["ernie-4.0", "ernie-3.5", "ernie-3.0"]
   };
 
-  const handleSaveModelConfig = () => {
-    // Here you would typically save to a backend
-    localStorage.setItem("modelType", modelType);
-    localStorage.setItem("apiKey", apiKey);
-    toast.success("模型配置保存成功");
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('settings');
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setSystemPrompt(settings.systemPrompt || "");
+      setSelectedFields(settings.selectedFields || []);
+      setModelType(settings.modelType || "");
+      setModelName(settings.modelName || "");
+      setApiKey(settings.apiKey || "");
+      setHasSubmitted(true);
+    }
+  }, []);
+
+  const handleFieldClick = (field: string) => {
+    if (!isEditing && hasSubmitted) return;
+    
+    if (selectedFields.includes(field)) {
+      setSystemPrompt(systemPrompt.replace(`{${field}}`, "").trim());
+      setSelectedFields(selectedFields.filter(f => f !== field));
+    } else {
+      setSystemPrompt(`${systemPrompt} {${field}}`.trim());
+      setSelectedFields([...selectedFields, field]);
+    }
+  };
+
+  const handleRemoveField = (field: string) => {
+    if (!isEditing && hasSubmitted) return;
+    
+    setSystemPrompt(systemPrompt.replace(`{${field}}`, "").trim());
+    setSelectedFields(selectedFields.filter(f => f !== field));
+  };
+
+  const handleSubmit = () => {
+    const settings = {
+      systemPrompt,
+      selectedFields,
+      modelType,
+      modelName,
+      apiKey
+    };
+    localStorage.setItem('settings', JSON.stringify(settings));
+    setHasSubmitted(true);
+    setIsEditing(false);
+    toast.success("设置保存成功");
   };
 
   return (
@@ -37,76 +91,128 @@ const Settings = () => {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">系统设置</h1>
         
-        <Tabs defaultValue="prompts" className="bg-white p-6 rounded-lg shadow">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="prompts">提示词管理</TabsTrigger>
-            <TabsTrigger value="model">模型配置</TabsTrigger>
-          </TabsList>
+        <div className="bg-white p-6 rounded-lg shadow space-y-6">
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">系统提示词</h2>
+              {hasSubmitted && (
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEditing(!isEditing)}
+                >
+                  {isEditing ? "取消编辑" : "编辑"}
+                </Button>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mb-4">
+              {formFields.map((field) => (
+                <Button
+                  key={field}
+                  variant={selectedFields.includes(field) ? "default" : "outline"}
+                  onClick={() => handleFieldClick(field)}
+                  disabled={!isEditing && hasSubmitted}
+                >
+                  {field}
+                </Button>
+              ))}
+            </div>
 
-          <TabsContent value="prompts" className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                系统提示词
-              </label>
+            <div className="space-y-2">
               <Textarea
                 value={systemPrompt}
-                onChange={(e) => setSystemPrompt(e.target.value)}
+                onChange={(e) => isEditing || !hasSubmitted ? setSystemPrompt(e.target.value) : null}
                 placeholder="输入系统提示词..."
                 className="h-40"
+                disabled={!isEditing && hasSubmitted}
               />
+              <div className="flex flex-wrap gap-2">
+                {selectedFields.map((field) => (
+                  <Badge key={field} variant="secondary" className="text-sm">
+                    {field}
+                    <button
+                      onClick={() => handleRemoveField(field)}
+                      className="ml-1 hover:text-red-500"
+                      disabled={!isEditing && hasSubmitted}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                用户提示词
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                模型类型
               </label>
-              <Textarea
-                value={userPrompt}
-                onChange={(e) => setUserPrompt(e.target.value)}
-                placeholder="输入用户提示词..."
-                className="h-40"
-              />
-            </div>
-
-            <Button onClick={handleSavePrompts} className="w-full">
-              保存提示词设置
-            </Button>
-          </TabsContent>
-
-          <TabsContent value="model" className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                选择模型
-              </label>
-              <Select value={modelType} onValueChange={setModelType}>
+              <Select
+                value={modelType}
+                onValueChange={(value) => {
+                  if (isEditing || !hasSubmitted) {
+                    setModelType(value);
+                    setModelName("");
+                  }
+                }}
+                disabled={!isEditing && hasSubmitted}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="选择大语言模型" />
+                  <SelectValue placeholder="选择模型类型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="gpt-4">GPT-4</SelectItem>
-                  <SelectItem value="gpt-4-turbo">GPT-4 Turbo</SelectItem>
-                  <SelectItem value="claude-3">Claude 3</SelectItem>
+                  {Object.keys(modelOptions).map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                API Key
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                模型名称
               </label>
-              <Input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="输入API Key..."
-              />
+              <Select
+                value={modelName}
+                onValueChange={(value) => isEditing || !hasSubmitted ? setModelName(value) : null}
+                disabled={!modelType || (!isEditing && hasSubmitted)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="选择模型名称" />
+                </SelectTrigger>
+                <SelectContent>
+                  {modelType && modelOptions[modelType as keyof typeof modelOptions].map((name) => (
+                    <SelectItem key={name} value={name}>
+                      {name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
-            <Button onClick={handleSaveModelConfig} className="w-full">
-              保存模型配置
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              API Key
+            </label>
+            <Input
+              type="password"
+              value={apiKey}
+              onChange={(e) => isEditing || !hasSubmitted ? setApiKey(e.target.value) : null}
+              placeholder="输入API Key..."
+              disabled={!isEditing && hasSubmitted}
+            />
+          </div>
+
+          {(!hasSubmitted || isEditing) && (
+            <Button onClick={handleSubmit} className="w-full">
+              提交
             </Button>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
     </div>
   );
