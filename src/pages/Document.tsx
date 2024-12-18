@@ -15,7 +15,6 @@ const Document = () => {
 
   const processStream = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
     const decoder = new TextDecoder();
-    let content = '';
     let currentParagraph = '';
 
     try {
@@ -35,16 +34,11 @@ const Document = () => {
               const parsed = JSON.parse(data);
               const textChunk = parsed.choices?.[0]?.delta?.content || '';
               
-              // Handle Markdown formatting
-              currentParagraph += textChunk;
-              
-              // Check for paragraph breaks
               if (textChunk.includes('\n\n') || textChunk.includes('\r\n\r\n')) {
-                content += currentParagraph + '\n\n';
-                setDocumentContent(prevContent => prevContent + currentParagraph + '\n\n');
+                setDocumentContent(prevContent => prevContent + currentParagraph + textChunk);
                 currentParagraph = '';
               } else {
-                content += textChunk;
+                currentParagraph += textChunk;
                 setDocumentContent(prevContent => prevContent + textChunk);
               }
             } catch (e) {
@@ -53,9 +47,7 @@ const Document = () => {
           }
         }
       }
-      return content;
     } finally {
-      // Append any remaining content in the current paragraph
       if (currentParagraph) {
         setDocumentContent(prevContent => prevContent + currentParagraph);
       }

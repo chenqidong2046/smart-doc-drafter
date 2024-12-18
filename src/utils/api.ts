@@ -15,7 +15,7 @@ export const callLLMApi = async (url: string, apiKey: string, messages: any[]) =
       messages,
       temperature: 0.7,
       max_tokens: 2000,
-      stream: true // Enable streaming
+      stream: true
     })
   });
 
