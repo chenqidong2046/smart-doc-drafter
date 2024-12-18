@@ -64,6 +64,7 @@ const Document = () => {
     const generateInitialDocument = async () => {
       setIsLoading(true);
       setDocumentContent(''); // Clear existing content
+      setChatHistory([]); // Clear chat history for new document
       try {
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
         const { modelUrl, apiKey, systemPrompt } = settings;
@@ -101,16 +102,24 @@ const Document = () => {
     if (!message.trim() || isLoading) return;
 
     setIsLoading(true);
-    setChatHistory([...chatHistory, `用户: ${message}`]);
-    setDocumentContent(''); // Clear existing content
+    const newMessage = `用户: ${message}`;
+    setChatHistory(prev => [...prev, newMessage]);
+    setDocumentContent(''); // Clear existing content before modification
 
     try {
       const settings = JSON.parse(localStorage.getItem('settings') || '{}');
       const { modelUrl, apiKey } = settings;
 
-      const reader = await callLLMApi(modelUrl, apiKey, [
-        { role: 'user', content: `请根据以下修改建议修改文档内容：${message}\n\n当前文档内容：${documentContent}` }
-      ]);
+      // Include chat history context in the API call
+      const messages = [
+        ...chatHistory.map(chat => ({
+          role: chat.startsWith('用户:') ? 'user' : 'assistant',
+          content: chat.substring(chat.indexOf(':') + 1).trim()
+        })),
+        { role: 'user', content: message }
+      ];
+
+      const reader = await callLLMApi(modelUrl, apiKey, messages);
 
       await processStream(reader);
       setChatHistory(prev => [...prev, `AI: 已根据您的建议修改文档内容`]);
