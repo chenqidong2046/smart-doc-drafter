@@ -10,7 +10,12 @@ export const callLLMApi = async (url: string, apiKey: string, messages: any[]) =
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
-    body: JSON.stringify({ messages })
+    body: JSON.stringify({
+      model: "deepseek-chat", // Adding the required model parameter
+      messages,
+      temperature: 0.7,
+      max_tokens: 2000
+    })
   });
 
   if (!response.ok) {
