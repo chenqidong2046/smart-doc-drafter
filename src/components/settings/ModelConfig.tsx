@@ -1,22 +1,21 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
 interface ModelConfigProps {
-  modelType: string;
+  modelUrl: string;
   modelName: string;
   apiKey: string;
   isEditing: boolean;
-  onModelTypeChange: (value: string) => void;
+  onModelUrlChange: (value: string) => void;
   onModelNameChange: (value: string) => void;
   onApiKeyChange: (value: string) => void;
 }
 
 export const ModelConfig = ({
-  modelType,
+  modelUrl,
   modelName,
   apiKey,
   isEditing,
-  onModelTypeChange,
+  onModelUrlChange,
   onModelNameChange,
   onApiKeyChange,
 }: ModelConfigProps) => {
@@ -31,46 +30,28 @@ export const ModelConfig = ({
     <div className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          模型类型
+          模型接口地址
         </label>
-        <Select
-          value={modelType}
-          onValueChange={onModelTypeChange}
+        <Input
+          value={modelUrl}
+          onChange={(e) => onModelUrlChange(e.target.value)}
+          placeholder="输入模型API接口地址..."
           disabled={!isEditing}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="选择模型类型" />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.keys(modelOptions).map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          className="font-mono"
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           模型名称
         </label>
-        <Select
+        <Input
           value={modelName}
-          onValueChange={onModelNameChange}
-          disabled={!modelType || !isEditing}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="选择模型名称" />
-          </SelectTrigger>
-          <SelectContent>
-            {modelType && modelOptions[modelType as keyof typeof modelOptions].map((name) => (
-              <SelectItem key={name} value={name}>
-                {name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={(e) => onModelNameChange(e.target.value)}
+          placeholder="输入模型名称..."
+          disabled={!isEditing}
+          className="font-mono"
+        />
       </div>
 
       <div>

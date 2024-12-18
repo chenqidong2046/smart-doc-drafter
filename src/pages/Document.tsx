@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 const Document = () => {
   const location = useLocation();
@@ -11,31 +12,105 @@ const Document = () => {
   const [documentContent, setDocumentContent] = useState("");
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // If there's no state, redirect to the form page
     if (!location.state) {
       navigate('/');
       return;
     }
 
-    // Simulate initial document generation
-    const { topic, keywords, subject, audience, wordCount, additionalInfo } = location.state;
-    const initialDoc = `关于${topic}的报告\n\n主要内容：${subject}\n目标受众：${audience}\n关键词：${keywords}\n\n这里是生成的文档内容...`;
-    setDocumentContent(initialDoc);
+    const generateInitialDocument = async () => {
+      setIsLoading(true);
+      try {
+        const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+        const { modelUrl, apiKey, systemPrompt } = settings;
+        
+        if (!modelUrl || !apiKey) {
+          toast.error("请先在设置页面配置模型接口地址和API Key");
+          return;
+        }
+
+        const formData = location.state;
+        const prompt = systemPrompt.replace(/\{([^}]+)\}/g, (match, field) => {
+          return formData[field.toLowerCase()] || '';
+        });
+
+        const response = await fetch(modelUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: prompt },
+              { role: 'user', content: `请根据以下信息生成文档：${JSON.stringify(formData)}` }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('API调用失败');
+        }
+
+        const data = await response.json();
+        setDocumentContent(data.choices?.[0]?.message?.content || '生成失败，请检查API配置');
+      } catch (error) {
+        console.error('Error generating document:', error);
+        toast.error("生成文档失败，请检查API配置");
+        setDocumentContent("生成失败，请检查API配置");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    generateInitialDocument();
   }, [location.state, navigate]);
 
-  const handleMessageSubmit = (e: React.FormEvent) => {
+  const handleMessageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || isLoading) return;
 
-    // Add message to chat history
+    setIsLoading(true);
     setChatHistory([...chatHistory, `用户: ${message}`]);
-    // Simulate AI response
-    setChatHistory((prev) => [...prev, `AI: 已根据您的要求调整文档内容`]);
-    // Update document based on message (in real app, this would be AI-generated)
-    setDocumentContent((prev) => prev + "\n\n[根据用户反馈添加的新内容]");
-    setMessage("");
+
+    try {
+      const settings = JSON.parse(localStorage.getItem('settings') || '{}');
+      const { modelUrl, apiKey } = settings;
+
+      const response = await fetch(modelUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: 'user', content: `请根据以下修改建议修改文档内容：${message}\n\n当前文档内容：${documentContent}` }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('API调用失败');
+      }
+
+      const data = await response.json();
+      const newContent = data.choices?.[0]?.message?.content;
+      
+      if (newContent) {
+        setDocumentContent(newContent);
+        setChatHistory(prev => [...prev, `AI: 已根据您的建议修改文档内容`]);
+      }
+    } catch (error) {
+      console.error('Error updating document:', error);
+      toast.error("修改文档失败，请检查API配置");
+      setChatHistory(prev => [...prev, `AI: 修改失败，请检查API配置`]);
+    } finally {
+      setIsLoading(false);
+      setMessage("");
+    }
   };
 
   const handleDownload = () => {
@@ -49,13 +124,11 @@ const Document = () => {
   };
 
   const handleBack = () => {
-    // Navigate back with the original form data
     navigate('/', { state: location.state });
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex">
-      {/* Left side - Chat */}
       <div className="w-1/3 bg-white border-r border-gray-200 p-4 flex flex-col">
         <div className="mb-4 flex items-center justify-between">
           <Button 
@@ -90,28 +163,34 @@ const Document = () => {
             onChange={(e) => setMessage(e.target.value)}
             placeholder="输入修改建议..."
             className="mb-2 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+            disabled={isLoading}
           />
-          <Button type="submit" className="w-full">
-            发送
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? "处理中..." : "发送"}
           </Button>
         </form>
       </div>
 
-      {/* Right side - Document Preview */}
       <div className="flex-1 p-4 flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-900">文档预览</h2>
-          <Button onClick={handleDownload}>下载文档</Button>
+          <Button onClick={handleDownload} disabled={isLoading}>下载文档</Button>
         </div>
         
         <ScrollArea className="flex-1">
           <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100 min-h-full">
             <div className="prose max-w-none">
-              {documentContent.split("\n").map((line, index) => (
-                <p key={index} className="mb-4 text-gray-700">
-                  {line}
-                </p>
-              ))}
+              {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
+              ) : (
+                documentContent.split("\n").map((line, index) => (
+                  <p key={index} className="mb-4 text-gray-700">
+                    {line}
+                  </p>
+                ))
+              )}
             </div>
           </div>
         </ScrollArea>

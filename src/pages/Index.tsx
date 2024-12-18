@@ -47,7 +47,7 @@ const Index = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <img 
-            src="/lovable-uploads/a0ea2d20-6785-41ab-b3d0-cb12d1676761.png" 
+            src="/lovable-uploads/49046c77-03e3-4c67-9692-06d8036ca0db.png" 
             alt="华中师范大学" 
             className="h-12 object-contain"
           />

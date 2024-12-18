@@ -8,7 +8,7 @@ import { ModelConfig } from "@/components/settings/ModelConfig";
 const Settings = () => {
   const [systemPrompt, setSystemPrompt] = useState("");
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  const [modelType, setModelType] = useState("");
+  const [modelUrl, setModelUrl] = useState("");
   const [modelName, setModelName] = useState("");
   const [apiKey, setApiKey] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -30,7 +30,7 @@ const Settings = () => {
       const settings = JSON.parse(savedSettings);
       setSystemPrompt(settings.systemPrompt || "");
       setSelectedFields(settings.selectedFields || []);
-      setModelType(settings.modelType || "");
+      setModelUrl(settings.modelUrl || "");
       setModelName(settings.modelName || "");
       setApiKey(settings.apiKey || "");
       setHasSubmitted(true);
@@ -60,7 +60,7 @@ const Settings = () => {
     const settings = {
       systemPrompt,
       selectedFields,
-      modelType,
+      modelUrl,
       modelName,
       apiKey
     };
@@ -87,11 +87,11 @@ const Settings = () => {
           />
 
           <ModelConfig
-            modelType={modelType}
+            modelUrl={modelUrl}
             modelName={modelName}
             apiKey={apiKey}
             isEditing={isEditing || !hasSubmitted}
-            onModelTypeChange={setModelType}
+            onModelUrlChange={setModelUrl}
             onModelNameChange={setModelName}
             onApiKeyChange={setApiKey}
           />
