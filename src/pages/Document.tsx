@@ -13,6 +13,41 @@ const Document = () => {
   const [chatHistory, setChatHistory] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const processStream = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
+    const decoder = new TextDecoder();
+    let content = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Decode the chunk and append to content
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n').filter(line => line.trim() !== '');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            
+            try {
+              const parsed = JSON.parse(data);
+              const textChunk = parsed.choices?.[0]?.delta?.content || '';
+              content += textChunk;
+              setDocumentContent(prevContent => prevContent + textChunk);
+            } catch (e) {
+              console.error('Error parsing JSON:', e);
+            }
+          }
+        }
+      }
+      return content;
+    } finally {
+      reader.releaseLock();
+    }
+  };
+
   useEffect(() => {
     if (!location.state) {
       navigate('/');
@@ -21,6 +56,7 @@ const Document = () => {
 
     const generateInitialDocument = async () => {
       setIsLoading(true);
+      setDocumentContent(''); // Clear existing content
       try {
         const settings = JSON.parse(localStorage.getItem('settings') || '{}');
         const { modelUrl, apiKey, systemPrompt } = settings;
@@ -35,12 +71,12 @@ const Document = () => {
           return formData[field.toLowerCase()] || '';
         });
 
-        const data = await callLLMApi(modelUrl, apiKey, [
+        const reader = await callLLMApi(modelUrl, apiKey, [
           { role: 'system', content: prompt },
           { role: 'user', content: `请根据以下信息生成文档：${JSON.stringify(formData)}` }
         ]);
 
-        setDocumentContent(data.choices?.[0]?.message?.content || '生成失败，请检查API配置');
+        await processStream(reader);
       } catch (error) {
         console.error('Error generating document:', error);
         toast.error(error instanceof Error ? error.message : "生成文档失败，请检查API配置");
@@ -59,21 +95,18 @@ const Document = () => {
 
     setIsLoading(true);
     setChatHistory([...chatHistory, `用户: ${message}`]);
+    setDocumentContent(''); // Clear existing content
 
     try {
       const settings = JSON.parse(localStorage.getItem('settings') || '{}');
       const { modelUrl, apiKey } = settings;
 
-      const data = await callLLMApi(modelUrl, apiKey, [
+      const reader = await callLLMApi(modelUrl, apiKey, [
         { role: 'user', content: `请根据以下修改建议修改文档内容：${message}\n\n当前文档内容：${documentContent}` }
       ]);
 
-      const newContent = data.choices?.[0]?.message?.content;
-      
-      if (newContent) {
-        setDocumentContent(newContent);
-        setChatHistory(prev => [...prev, `AI: 已根据您的建议修改文档内容`]);
-      }
+      await processStream(reader);
+      setChatHistory(prev => [...prev, `AI: 已根据您的建议修改文档内容`]);
     } catch (error) {
       console.error('Error updating document:', error);
       toast.error(error instanceof Error ? error.message : "修改文档失败，请检查API配置");

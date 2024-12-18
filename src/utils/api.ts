@@ -11,10 +11,11 @@ export const callLLMApi = async (url: string, apiKey: string, messages: any[]) =
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: "deepseek-chat", // Adding the required model parameter
+      model: "deepseek-chat",
       messages,
       temperature: 0.7,
-      max_tokens: 2000
+      max_tokens: 2000,
+      stream: true // Enable streaming
     })
   });
 
@@ -23,5 +24,8 @@ export const callLLMApi = async (url: string, apiKey: string, messages: any[]) =
     throw new Error(`API调用失败 (${response.status}): ${errorText}`);
   }
 
-  return response.json();
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("无法获取响应流");
+
+  return reader;
 };
