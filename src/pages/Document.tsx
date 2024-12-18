@@ -16,13 +16,13 @@ const Document = () => {
   const processStream = async (reader: ReadableStreamDefaultReader<Uint8Array>) => {
     const decoder = new TextDecoder();
     let content = '';
+    let currentParagraph = '';
 
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Decode the chunk and append to content
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n').filter(line => line.trim() !== '');
         
@@ -34,8 +34,19 @@ const Document = () => {
             try {
               const parsed = JSON.parse(data);
               const textChunk = parsed.choices?.[0]?.delta?.content || '';
-              content += textChunk;
-              setDocumentContent(prevContent => prevContent + textChunk);
+              
+              // Handle Markdown formatting
+              currentParagraph += textChunk;
+              
+              // Check for paragraph breaks
+              if (textChunk.includes('\n\n') || textChunk.includes('\r\n\r\n')) {
+                content += currentParagraph + '\n\n';
+                setDocumentContent(prevContent => prevContent + currentParagraph + '\n\n');
+                currentParagraph = '';
+              } else {
+                content += textChunk;
+                setDocumentContent(prevContent => prevContent + textChunk);
+              }
             } catch (e) {
               console.error('Error parsing JSON:', e);
             }
@@ -44,6 +55,10 @@ const Document = () => {
       }
       return content;
     } finally {
+      // Append any remaining content in the current paragraph
+      if (currentParagraph) {
+        setDocumentContent(prevContent => prevContent + currentParagraph);
+      }
       reader.releaseLock();
     }
   };

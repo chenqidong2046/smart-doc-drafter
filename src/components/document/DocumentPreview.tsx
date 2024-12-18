@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import ReactMarkdown from 'react-markdown';
 
 interface DocumentPreviewProps {
   documentContent: string;
@@ -27,11 +28,7 @@ export const DocumentPreview = ({
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
             ) : (
-              documentContent.split("\n").map((line, index) => (
-                <p key={index} className="mb-4 text-gray-700">
-                  {line}
-                </p>
-              ))
+              <ReactMarkdown>{documentContent}</ReactMarkdown>
             )}
           </div>
         </div>
