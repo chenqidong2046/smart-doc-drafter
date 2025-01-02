@@ -49,7 +49,7 @@ export const DocumentForm = ({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-lg border border-gray-100">
-      <FormField label="主题">
+      <FormField label="主题" required>
         <Input
           required
           value={formData.topic}
@@ -60,7 +60,7 @@ export const DocumentForm = ({
       </FormField>
 
       <div className="grid grid-cols-2 gap-4">
-        <FormField label="文档类型">
+        <FormField label="文档类型" required>
           <Select
             value={formData.documentType}
             onValueChange={(value) => onChange("documentType", value)}
@@ -79,7 +79,7 @@ export const DocumentForm = ({
           </Select>
         </FormField>
 
-        <FormField label="字数">
+        <FormField label="字数" required>
           <Select
             value={formData.wordCount}
             onValueChange={(value) => onChange("wordCount", value)}
@@ -99,7 +99,7 @@ export const DocumentForm = ({
         </FormField>
       </div>
 
-      <FormField label="关键词">
+      <FormField label="关键词" required>
         <Input
           required
           value={formData.keywords}
@@ -110,7 +110,7 @@ export const DocumentForm = ({
       </FormField>
 
       <div className="grid grid-cols-2 gap-4">
-        <FormField label="主体">
+        <FormField label="主体" required>
           <Input
             required
             value={formData.subject}
@@ -119,7 +119,7 @@ export const DocumentForm = ({
             className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
           />
         </FormField>
-        <FormField label="受众">
+        <FormField label="受众" required>
           <Input
             required
             value={formData.audience}
