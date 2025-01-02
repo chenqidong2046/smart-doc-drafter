@@ -14,17 +14,20 @@ const Index = () => {
     audience: "",
     wordCount: "",
     additionalInfo: "",
+    referenceDoc: undefined as File | undefined,
   });
   const [docTypes, setDocTypes] = useState<string[]>([]);
   const [wordCounts, setWordCounts] = useState<string[]>([]);
 
-  // Load form data and dictionary values from localStorage
   useEffect(() => {
     const savedFormData = localStorage.getItem('formData');
     const savedSettings = localStorage.getItem('settings');
     
     if (savedFormData) {
-      setFormData(JSON.parse(savedFormData));
+      const parsedData = JSON.parse(savedFormData);
+      // Don't restore the file input from localStorage
+      delete parsedData.referenceDoc;
+      setFormData(prev => ({...prev, ...parsedData}));
     }
     
     if (savedSettings) {
@@ -36,11 +39,14 @@ const Index = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('formData', JSON.stringify(formData));
+    // Don't store the file in localStorage
+    const formDataForStorage = {...formData};
+    delete formDataForStorage.referenceDoc;
+    localStorage.setItem('formData', JSON.stringify(formDataForStorage));
     navigate("/document", { state: formData });
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: string | File) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
