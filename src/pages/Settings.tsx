@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { SettingsHeader } from "@/components/settings/SettingsHeader";
 import { PromptEditor } from "@/components/settings/PromptEditor";
 import { ModelConfig } from "@/components/settings/ModelConfig";
+import { DictionaryConfig } from "@/components/settings/DictionaryConfig";
 
 const Settings = () => {
   const [systemPrompt, setSystemPrompt] = useState("");
@@ -13,6 +14,8 @@ const Settings = () => {
   const [apiKey, setApiKey] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [docTypes, setDocTypes] = useState<string[]>([]);
+  const [wordCounts, setWordCounts] = useState<string[]>([]);
 
   const formFields = [
     "文档类型",
@@ -33,6 +36,8 @@ const Settings = () => {
       setModelUrl(settings.modelUrl || "");
       setModelName(settings.modelName || "");
       setApiKey(settings.apiKey || "");
+      setDocTypes(settings.docTypes || []);
+      setWordCounts(settings.wordCounts || []);
       setHasSubmitted(true);
     }
   }, []);
@@ -62,7 +67,9 @@ const Settings = () => {
       selectedFields,
       modelUrl,
       modelName,
-      apiKey
+      apiKey,
+      docTypes,
+      wordCounts
     };
     localStorage.setItem('settings', JSON.stringify(settings));
     setHasSubmitted(true);
@@ -94,6 +101,14 @@ const Settings = () => {
             onModelUrlChange={setModelUrl}
             onModelNameChange={setModelName}
             onApiKeyChange={setApiKey}
+          />
+
+          <DictionaryConfig
+            docTypes={docTypes}
+            wordCounts={wordCounts}
+            isEditing={isEditing || !hasSubmitted}
+            onDocTypesChange={setDocTypes}
+            onWordCountsChange={setWordCounts}
           />
 
           <div className="flex justify-end gap-4">
