@@ -36,24 +36,6 @@ export const DocumentForm = ({
 }: DocumentFormProps) => {
   return (
     <form onSubmit={onSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-lg border border-gray-100">
-      <FormField label="文档类型">
-        <Select
-          value={formData.documentType}
-          onValueChange={(value) => onChange("documentType", value)}
-        >
-          <SelectTrigger className="border-gray-200">
-            <SelectValue placeholder="选择文档类型" />
-          </SelectTrigger>
-          <SelectContent>
-            {docTypes.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormField>
-
       <FormField label="主题">
         <Input
           required
@@ -63,6 +45,44 @@ export const DocumentForm = ({
           className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
         />
       </FormField>
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField label="文档类型">
+          <Select
+            value={formData.documentType}
+            onValueChange={(value) => onChange("documentType", value)}
+          >
+            <SelectTrigger className="border-gray-200">
+              <SelectValue placeholder="选择文档类型" />
+            </SelectTrigger>
+            <SelectContent>
+              {docTypes.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+
+        <FormField label="字数">
+          <Select
+            value={formData.wordCount}
+            onValueChange={(value) => onChange("wordCount", value)}
+          >
+            <SelectTrigger className="border-gray-200">
+              <SelectValue placeholder="选择字数" />
+            </SelectTrigger>
+            <SelectContent>
+              {wordCounts.map((count) => (
+                <SelectItem key={count} value={count}>
+                  {count}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FormField>
+      </div>
 
       <FormField label="关键词">
         <Input
@@ -94,24 +114,6 @@ export const DocumentForm = ({
           />
         </FormField>
       </div>
-
-      <FormField label="字数">
-        <Select
-          value={formData.wordCount}
-          onValueChange={(value) => onChange("wordCount", value)}
-        >
-          <SelectTrigger className="border-gray-200">
-            <SelectValue placeholder="选择字数" />
-          </SelectTrigger>
-          <SelectContent>
-            {wordCounts.map((count) => (
-              <SelectItem key={count} value={count}>
-                {count}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormField>
 
       <FormField label="其他信息">
         <Textarea
