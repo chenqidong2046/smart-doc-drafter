@@ -1,45 +1,50 @@
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useNavigate } from "react-router-dom";
 import { Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { DocumentForm } from "@/components/form/DocumentForm";
 
 const Index = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [formData, setFormData] = useState({
     documentType: "",
     topic: "",
     keywords: "",
     subject: "",
     audience: "",
-    wordCount: "800",
+    wordCount: "",
     additionalInfo: "",
   });
+  const [docTypes, setDocTypes] = useState<string[]>([]);
+  const [wordCounts, setWordCounts] = useState<string[]>([]);
 
-  // Load form data from localStorage or location state when component mounts
+  // Load form data and dictionary values from localStorage
   useEffect(() => {
     const savedFormData = localStorage.getItem('formData');
-    if (location.state) {
-      setFormData(location.state);
-    } else if (savedFormData) {
+    const savedSettings = localStorage.getItem('settings');
+    
+    if (savedFormData) {
       setFormData(JSON.parse(savedFormData));
     }
-  }, [location.state]);
+    
+    if (savedSettings) {
+      const settings = JSON.parse(savedSettings);
+      setDocTypes(settings.docTypes || []);
+      setWordCounts(settings.wordCounts || []);
+    }
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Save form data to localStorage before navigating
     localStorage.setItem('formData', JSON.stringify(formData));
     navigate("/document", { state: formData });
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   return (
@@ -66,136 +71,13 @@ const Index = () => {
           <p className="text-gray-600">填写以下信息，开始智能文档起草</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg shadow-lg border border-gray-100">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              主题
-            </label>
-            <Input
-              required
-              value={formData.topic}
-              onChange={(e) =>
-                setFormData({ ...formData, topic: e.target.value })
-              }
-              placeholder="请输入文档主题"
-              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                文档类型
-              </label>
-              <Select
-                value={formData.documentType}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, documentType: value })
-                }
-              >
-                <SelectTrigger className="border-gray-200">
-                  <SelectValue placeholder="选择文档类型" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="讲话稿">讲话稿</SelectItem>
-                  <SelectItem value="总结报告">总结报告</SelectItem>
-                  <SelectItem value="工作方案">工作方案</SelectItem>
-                  <SelectItem value="心得体会">心得体会</SelectItem>
-                  <SelectItem value="通知">通知</SelectItem>
-                  <SelectItem value="通报">通报</SelectItem>
-                  <SelectItem value="调研报告">调研报告</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                字数
-              </label>
-              <Select
-                value={formData.wordCount}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, wordCount: value })
-                }
-              >
-                <SelectTrigger className="border-gray-200">
-                  <SelectValue placeholder="选择字数" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="800以内">800字以内</SelectItem>
-                  <SelectItem value="800">800字</SelectItem>
-                  <SelectItem value="1000">1000字</SelectItem>
-                  <SelectItem value="1500">1500字</SelectItem>
-                  <SelectItem value="2000">2000字</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                主体
-              </label>
-              <Input
-                required
-                value={formData.subject}
-                onChange={(e) =>
-                  setFormData({ ...formData, subject: e.target.value })
-                }
-                placeholder="请输入文档主体"
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                受众
-              </label>
-              <Input
-                required
-                value={formData.audience}
-                onChange={(e) =>
-                  setFormData({ ...formData, audience: e.target.value })
-                }
-                placeholder="请输入目标受众"
-                className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              关键词
-            </label>
-            <Input
-              required
-              value={formData.keywords}
-              onChange={(e) =>
-                setFormData({ ...formData, keywords: e.target.value })
-              }
-              placeholder="请输入关键词，多个关键词请用逗号分隔"
-              className="border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              其他信息
-            </label>
-            <Textarea
-              value={formData.additionalInfo}
-              onChange={(e) =>
-                setFormData({ ...formData, additionalInfo: e.target.value })
-              }
-              placeholder="请输入其他补充信息"
-              className="h-32 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-            />
-          </div>
-
-          <Button type="submit" className="w-full">
-            开始生成文档
-          </Button>
-        </form>
+        <DocumentForm
+          formData={formData}
+          docTypes={docTypes}
+          wordCounts={wordCounts}
+          onSubmit={handleSubmit}
+          onChange={handleChange}
+        />
       </div>
     </div>
   );
